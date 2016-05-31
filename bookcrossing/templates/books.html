@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+        <div class="col-md-4">
+            <h2>Add new book</h2>
+            <hr/>
+            <form method="post" action="{{ url_for('books') }}">
+                {%  set field = form.title %}
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" placeholder="Title" name="title">
+                   {% if field.errors %}
+                       {% for e in field.errors %}
+                            <p class="text-danger">{{ e }}</p>
+                       {% endfor %}
+                    {% endif %}
+                </div>
+
+                {%  set field = form.author %}
+                <div class="form-group">
+                    <label for="author">Author</label>
+                    <input type="text" class="form-control" id="author" placeholder="Author" name="author">
+                    {% if field.errors %}
+                       {% for e in field.errors %}
+                            <p class="text-danger">{{ e }}</p>
+                       {% endfor %}
+                    {% endif %}
+                </div>
+
+
+                {%  set field = form.publisher %}
+                <div class="form-group">
+                    <label for="publisher">Publisher</label>
+                    <input type="text" class="form-control" id="publisher" placeholder="Publisher" name="publisher">
+                    {% if field.errors %}
+                       {% for e in field.errors %}
+                            <p class="text-danger">{{ e }}</p>
+                       {% endfor %}
+                    {% endif %}
+                </div>
+
+
+                {%  set field = form.category %}
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" class="form-control" id="category" placeholder="Category" name="category">
+                    {% if field.errors %}
+                       {% for e in field.errors %}
+                            <p class="text-danger">{{ e }}</p>
+                       {% endfor %}
+                    {% endif %}
+                </div>
+
+                <button id='add-book' type="submit" class="btn btn-primary btn-block">Add new book</button><br>
+            </form>
+        </div>
+
+        <div class="col-md-8">
+            <h2>Recently added books</h2>
+            <hr/>
+            {% if shelf %}
+                <table class="table table-hover" style="margin-top:-11px">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in shelf %}
+                            <tr>
+                                <td><a href="/books/{{  book['id'] }}">{{ book['title'] }}</a></td>
+                                <td>{{ book['author'] }}</td>
+                                <td>{{ book['category'] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h3>No books were added</h3>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

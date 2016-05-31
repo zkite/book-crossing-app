@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+       <div class="col-md-12">
+            <h2>Search result</h2>
+            <hr/>
+            {% if result %}
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in result %}
+                            <tr>
+                                <td><a href="/books/{{  book['id'] }}">{{ book['title'] }}</a></td>
+                                <td>{{ book['author'] }}</td>
+                                <td>{{ book['category'] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h2>No such book in catalog</h2>
+                <hr/>
+            {% endif %}
+       </div>
+</div>
+{% endblock %}
