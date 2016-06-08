@@ -1,78 +1,137 @@
 {% extends "layout.html" %}
 {% block body %}
+<script>
+
+    function add_book(){
+        $('#form')[0].reset(); // reset form on modals
+        $('.text-danger').remove()
+        $('#modal_form').modal('show'); // show bootstrap modal
+        $('.modal-title').text('Add Book'); // Set Title to Bootstrap modal title
+    }
+
+    function save() {
+    $('.text-danger').remove()
+    console.log($('#form').serialize())
+
+    // ajax adding data to database
+    $.ajax({
+        url : '{{ url_for('books') }}',
+        type: "POST",
+        data: $('#form').serialize(),
+        success: function(data){
+
+            var element = '';
+
+            function IsJson(str) {
+                try {
+                    JSON.parse(str);
+                } catch (e) {
+                    return false;
+                }
+                return true;
+            }
+
+            if(IsJson(data)) //if success close modal and reload ajax table
+            {
+                data = JSON.parse(data)
+
+                if(data['title']) {
+                    element = "<p class='text-danger'>" + data['title'][0] + "</p>"
+                    $('#title').append(element)
+                }
+
+                if(data['author']) {
+                    element = "<p class='text-danger'>" + data['author'][0] + "</p>"
+                    $('#author').append(element)
+                }
+
+                if(data['category']) {
+                    element = "<p class='text-danger'>" + data['category'][0] + "</p>"
+                    $('#category').append(element)
+                }
+
+                if(data['publisher']) {
+                    element = "<p class='text-danger'>" + data['publisher'][0] + "</p>"
+                    $('#publisher').append(element)
+                }
+
+            } else {
+                //hide modal
+                $('#modal_form').modal('hide');
+                //reload page
+                location.reload()
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            console.log(jqXHR)
+            console.log(textStatus)
+            console.log(errorThrown)
+            alert('Error adding / update data');
+        }
+    });
+}
+
+    function delete_book(id) {
+
+            //form data
+            var book = {}
+            book['id'] = id
+
+            $.ajax({
+                url : "{{ url_for('books') }}",
+                data: JSON.stringify(book),
+                type: "DELETE",
+                contentType: "application/json",
+
+                success: function(data){
+
+                    //data = JSON.parse(data)
+                    console.log(data)
+                    //if success reload ajax table
+                    //$('#modal_form').modal('hide');
+                    var element = '#'+data['id']
+                    $(element).remove()
+
+                },
+
+                error: function (jqXHR, textStatus, errorThrown)
+                {
+                    alert('Error deleting data');
+                }
+            });
+    }
+
+</script>
+<h2>Users book shelf</h2>
+<hr/>
+<button class="btn btn-success" onclick="add_book()"><i class="glyphicon glyphicon-plus"></i> Add Book</button>
+<br/>
+<br/>
 <div class="row">
-        <div class="col-md-4">
-            <h2>Add new book</h2>
-            <hr/>
-            <form method="post" action="{{ url_for('books') }}">
-                {%  set field = form.title %}
-                <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" class="form-control" id="title" placeholder="Title" name="title">
-                   {% if field.errors %}
-                       {% for e in field.errors %}
-                            <p class="text-danger">{{ e }}</p>
-                       {% endfor %}
-                    {% endif %}
-                </div>
-
-                {%  set field = form.author %}
-                <div class="form-group">
-                    <label for="author">Author</label>
-                    <input type="text" class="form-control" id="author" placeholder="Author" name="author">
-                    {% if field.errors %}
-                       {% for e in field.errors %}
-                            <p class="text-danger">{{ e }}</p>
-                       {% endfor %}
-                    {% endif %}
-                </div>
-
-
-                {%  set field = form.publisher %}
-                <div class="form-group">
-                    <label for="publisher">Publisher</label>
-                    <input type="text" class="form-control" id="publisher" placeholder="Publisher" name="publisher">
-                    {% if field.errors %}
-                       {% for e in field.errors %}
-                            <p class="text-danger">{{ e }}</p>
-                       {% endfor %}
-                    {% endif %}
-                </div>
-
-
-                {%  set field = form.category %}
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <input type="text" class="form-control" id="category" placeholder="Category" name="category">
-                    {% if field.errors %}
-                       {% for e in field.errors %}
-                            <p class="text-danger">{{ e }}</p>
-                       {% endfor %}
-                    {% endif %}
-                </div>
-
-                <button id='add-book' type="submit" class="btn btn-primary btn-block">Add new book</button><br>
-            </form>
-        </div>
-
-        <div class="col-md-8">
-            <h2>Recently added books</h2>
-            <hr/>
+        <div class="col-md-12">
             {% if shelf %}
                 <table class="table table-hover" style="margin-top:-11px">
                     <thead>
                         <tr>
                             <th>Title</th>
                             <th>Author</th>
+                            <th>Publisher</th>
                             <th>Category</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for book in shelf %}
-                            <tr>
+                            <tr id="{{ book['id'] }}">
                                 <td><a href="/books/{{  book['id'] }}">{{ book['title'] }}</a></td>
                                 <td>{{ book['author'] }}</td>
+                                <td>{{ book['publisher'] }}</td>
                                 <td>{{ book['category'] }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-info">Edit</button>
+                                    <button type="button" class="btn btn-danger" onclick="delete_book('{{ book["id"] }}')">Delete</button>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -81,5 +140,45 @@
                 <h3>No books were added</h3>
             {% endif %}
         </div>
-    </div>
+</div>
+
+<div class="modal fade" id="modal_form" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title">Book Form</h3>
+            </div>
+            <div class="modal-body form">
+            <form id="form" method="post">
+
+                <div id="title" class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control"  placeholder="Title" name="title">
+                </div>
+
+                <div id="author" class="form-group">
+                    <label for="author">Author</label>
+                    <input type="text" class="form-control"  placeholder="Author" name="author">
+                </div>
+
+                <div id="publisher" class="form-group">
+                    <label for="publisher">Publisher</label>
+                    <input type="text" class="form-control" placeholder="Publisher" name="publisher">
+                </div>
+
+                <div id="category" class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" class="form-control" placeholder="Category" name="category">
+                </div>
+            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" onclick="save()" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- End Bootstrap modal -->
 {% endblock %}

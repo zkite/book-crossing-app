@@ -1,19 +1,18 @@
 from bookcrossing import db
 
 userBooks = db.Table('userBooks', db.Model.metadata,
-	db.Column('user_id', db.ForeignKey('users.id')),
-	db.Column('book_id', db.ForeignKey('books.id'))
+	db.Column('user_id', db.ForeignKey('users.id'), nullable=False),
+	db.Column('book_id', db.ForeignKey('books.id'), nullable=False)
 )
 
 
 class User(db.Model):
 	__tablename__ = 'users'
-
 	id = db.Column('id', db.Integer, primary_key=True)
 	username = db.Column('username', db.String(20), unique=True, index=True, nullable=False)
 	password = db.Column('password', db.String(30), nullable=False)
 
-	books = db.relationship('Book', secondary=userBooks, backref=db.backref('users', lazy='dynamic'))
+	books = db.relationship('Book', secondary=userBooks, backref='users')
 
 	def __init__(self, username, password):
 		self.username = username
@@ -47,13 +46,9 @@ class Book(db.Model):
 	publisher = db.Column('publisher', db.String, nullable=False)
 	category = db.Column('category', db.String, nullable=False)
 
-	#users = db.relationship('User', secondary=user_books, back_populates='books')
 
 	def __init__(self, title, author, publisher, category):
 		self.title = title
 		self.author = author
 		self.publisher = publisher
 		self.category = category
-
-
-db.create_all()

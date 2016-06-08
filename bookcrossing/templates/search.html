@@ -20,12 +20,14 @@
                                 <td><a href="/books/{{  book['id'] }}">{{ book['title'] }}</a></td>
                                 <td>{{ book['author'] }}</td>
                                 <td>{{ book['category'] }}</td>
+                                <td>{{ book['users']['username'] }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             {% else %}
-                <h2>No such book in catalog</h2>
+                <h2>No such book in catalog or invalid input</h2>
+                <h3>For valid input try from 3 to 30 characters query length</h3>
                 <hr/>
             {% endif %}
        </div>
